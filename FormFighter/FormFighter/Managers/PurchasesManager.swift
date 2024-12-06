@@ -52,6 +52,11 @@ class PurchasesManager: ObservableObject {
     @Published var currentOffering: Offering?
     @Published var entitlement: EntitlementInfo?
     @Published var trialStatus: TrialStatus = .unknown
+    // We are now using a new variable isSubscribed for IAP
+    // 1. If user first open the app, it will be false
+    // 2. If user is in the subscription period, it will be true
+    // 3. If user's subscription expired or user cancelled within the trial period, it will be false
+    @Published var isSubscribed: Bool = false
     
     enum TrialStatus {
         case eligible
@@ -189,7 +194,8 @@ class PurchasesManager: ObservableObject {
     private func setupRevenueCat() {
         Purchases.logLevel = .error
         Purchases.configure(withAPIKey: Const.Purchases.key)
-        checkTrialStatus()
+        //checkTrialStatus()
+        checkSubscribed()
     }
     
     func fetchOfferings() {
@@ -243,6 +249,19 @@ class PurchasesManager: ObservableObject {
             } else {
                 // New user
                 self.trialStatus = .eligible
+            }
+        }
+    }
+    
+    func checkSubscribed() {
+        Purchases.shared.getCustomerInfo { [weak self] customerInfo, error in
+            guard let self = self, let info = customerInfo else {
+                Logger.log(message: "checkSubscribed returns without a info", event: .debug)
+                return
+            }
+            Logger.log(message: "Active subscriptions count is \(info.activeSubscriptions.count)", event: .info)
+            if info.activeSubscriptions.count > 0 {
+                isSubscribed = true
             }
         }
     }
