@@ -51,6 +51,9 @@ enum Const {
         
         // Replace 'premium' if you created the entitlement with other name
         static let premiumEntitlementIdentifier = "premium"
+        // Add another paywall
+        static let eliteEntitlementIdentifier = "elite"
+        
         
         // Replace with links to your Privacy Policy and Terms of Service
         // Prompts to generate them using ChatGPT:
